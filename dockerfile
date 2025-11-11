@@ -1,14 +1,14 @@
 # Imagen base
 FROM python:3.10.11-slim
 
-# Buenas prácticas de Python en contenedor
+# Evitar caché de bytecode y forzar salida sin buffer
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Directorio de trabajo dentro del contenedor
+# Directorio de trabajo
 WORKDIR /app
 
-# Dependencias de sistema + ODBC 18 para SQL Server (método moderno con keyrings)
+# Instalar dependencias del sistema y driver ODBC 18 para SQL Server
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl gnupg apt-transport-https ca-certificates \
       unixodbc unixodbc-dev \
@@ -20,12 +20,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
  && rm -rf /var/lib/apt/lists/*
 
-# Dependencias de Python
+# Instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Código de la app
+# Copiar código fuente
 COPY . .
 
-# Arranque de FastAPI
+# Comando de arranque FastAPI
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
