@@ -8,17 +8,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Directorio de trabajo
 WORKDIR /app
 
-# Instalar dependencias del sistema y driver ODBC 18 para SQL Server (usando repo de Debian 11)
+# Instalar dependencias del sistema y driver ODBC 18 descargando el paquete directo
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      curl gnupg apt-transport-https ca-certificates \
+      curl ca-certificates gnupg \
       unixodbc unixodbc-dev \
- && mkdir -p /etc/apt/keyrings \
- && curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg \
- && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/11/prod stable main" \
-    > /etc/apt/sources.list.d/mssql-release.list \
- && apt-get update \
- && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
- && rm -rf /var/lib/apt/lists/*
+ && curl -fSL -o /tmp/msodbcsql18.deb \
+      https://packages.microsoft.com/repos/microsoft-debian-bullseye-prod/pool/main/m/msodbcsql18/msodbcsql18_18.3.2.1-1_amd64.deb \
+ && ACCEPT_EULA=Y dpkg -i /tmp/msodbcsql18.deb || apt-get -f install -y \
+ && rm -rf /var/lib/apt/lists/* /tmp/msodbcsql18.deb
 
 # Instalar dependencias Python
 COPY requirements.txt .
@@ -27,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código fuente
 COPY . .
 
-# Exponer el puerto del contenedor (opcional, pero buena práctica)
+# Exponer el puerto (opcional)
 EXPOSE 8000
 
 # Comando de arranque FastAPI
