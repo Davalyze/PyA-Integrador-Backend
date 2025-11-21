@@ -1,0 +1,122 @@
+from pydantic import BaseModel
+from typing import List
+from fastapi import APIRouter, Query
+from typing import Optional
+from app.services import picking as svc_picking
+
+router = APIRouter()
+
+@router.get("/por_aprobar", summary="Pedidos por aprobar")
+def list_pedidos_por_aprobar():
+    """
+    Lista los pedidos que están pendientes de aprobación.
+    """
+    rows,_ = svc_picking.listar_pedidos()
+    return {"data": rows}
+
+@router.get("/aprobados", summary="Pedidos aprobados")
+def list_pedidos_por_aprobar():
+    """
+    Lista los pedidos que están pendientes de aprobación.
+    """
+    _,rows = svc_picking.listar_pedidos()
+    return {"data": rows}
+
+
+@router.get("/detalle")
+def detalle_pedido(numero: int, origen: str):
+    rows = svc_picking.pedido_details(numero, origen)
+    return {"data": rows}
+
+
+
+@router.get("/por_gestionar")
+def pedidos_por_gestionar():
+    rows = svc_picking.listar_pedidos_por_gestionar()
+    return {"data": rows}
+
+
+@router.get("/cartera_cliente")
+def cartera_cliente(cliente: str):
+    rows = svc_picking.cartera_by_cliente(cliente)
+    return {"data": rows}
+
+
+
+class DetalleAprobar(BaseModel):
+    codigo_producto: str
+
+class PedidoAprobar(BaseModel):
+    numero_pedido: int
+    origen: str
+    detalles: List[DetalleAprobar]
+
+
+@router.post("/aprobar_pedido")
+def aprobar_pedido(payload: PedidoAprobar):
+    try:
+        result = svc_picking.aprobar_pedido(
+            numero_pedido=payload.numero_pedido,
+            origen=payload.origen,
+            detalles=payload.detalles
+        )
+        return {"success": True, "message": "Pedido aprobado correctamente", "data": result}
+    except Exception as e:
+        print("❌ Error aprobando pedido:", e)
+        return {"success": False, "message": str(e)}
+
+
+
+
+@router.get("/sacar_pedido")
+def detalle_pedido_sacar(numero: int, origen: str):
+    rows = svc_picking.pedido_details_sacar(numero, origen)
+    return {"data": rows}
+
+
+
+@router.post("/cambiar_estado_sacar")
+def cambiar_estado_sacar(data: dict):
+    numero = data["numero_pedido"]
+    origen = data["origen"]
+
+    # Actualizamos pedidos_enc
+    svc_picking.update_estado(numero, origen, "SACAR")
+
+    return {"status": "ok", "estado": "SACAR"}
+
+
+
+
+
+class ProductoSacado(BaseModel):
+    codigo_producto: str
+    cantidad_sacada: int
+
+
+class SacarItems(BaseModel):
+    numero_pedido: int
+    origen: str
+    productos: List[ProductoSacado]
+
+
+@router.post("/guardar_cantidad_sacada")
+def guardar_cantidad_sacada(data: SacarItems):
+    print("📦 Recibido:", data)
+
+    try:
+        for prod in data.productos:
+            svc_picking.actualizar_cantidad_sacada(
+                numero_pedido=data.numero_pedido,
+                origen=data.origen,
+                referencia=prod.codigo_producto,
+                cantidad_sacada=prod.cantidad_sacada,
+            )
+
+        return {
+            "ok": True,
+            "message": "Cantidades guardadas correctamente"
+        }
+
+    except Exception as e:
+        return {"ok": False, "error": str(e)}

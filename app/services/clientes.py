@@ -4,6 +4,5 @@ def listar_clientes():
     """
     Lógica de negocio para listar clientes.
     """
-    rows = crud_clientes.get_clientes()
-    
+    rows = crud_clientes.get_pedidos_por_aprobar()
     return rows

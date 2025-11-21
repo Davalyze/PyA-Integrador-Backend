@@ -3,14 +3,15 @@ import pyodbc
 from dotenv import load_dotenv
 from app.core.config import settings
 
-class DatabaseManager:
+class SQLServerBase:
     """
-    Gestor de conexión a SQL Server (ERP PyA).
-    Permite ejecutar queries desde archivos .sql.
+    Clase base para manejar conexiones a SQL Server.
+    Permite ejecutar queries y leer archivos .sql sin duplicar código.
     """
 
-    def __init__(self):
+    def __init__(self, database_name: str):
         load_dotenv()
+        self.database_name = database_name
         self.connection = None
 
     def _connect(self):
@@ -21,7 +22,7 @@ class DatabaseManager:
             conn_str = (
                 f"DRIVER={{{settings.MSSQL_DRIVER}}};"
                 f"SERVER={settings.MSSQL_SERVER},{settings.MSSQL_PORT};"
-                f"DATABASE={settings.MSSQL_DB};"
+                f"DATABASE={self.database_name};"
                 f"UID={settings.MSSQL_USER};PWD={settings.MSSQL_PASSWORD};"
                 f"Encrypt=no;TrustServerCertificate=yes;"
             )
@@ -42,7 +43,7 @@ class DatabaseManager:
 
     def execute_query(self, sql: str, params: tuple | None = None):
         """
-        Ejecuta un SELECT y devuelve los resultados en formato dict.
+        Ejecuta un SELECT y devuelve los resultados como lista de dicts.
         """
         self._connect()
         cursor = self.connection.cursor()

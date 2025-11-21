@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import clientes, auth
+from app.api import clientes, auth,picking
 from fastapi.middleware.cors import CORSMiddleware
 import warnings
 
@@ -22,4 +22,6 @@ def health():
     return {"status": "ok"}
 
 app.include_router(clientes.router, prefix="/clientes", tags=["Clientes"])
+app.include_router(picking.router, prefix="/picking", tags=["Picking & Packing"])
+
 app.include_router(auth.router)

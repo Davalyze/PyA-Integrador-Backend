@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -6,6 +7,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from fastapi.responses import StreamingResponse
 from datetime import datetime, date
 from decimal import Decimal
+
 import io
 def sql_to_df(query_result):
     """
@@ -34,6 +36,8 @@ def df_to_dict(df):
     """
     Convierte un DataFrame en una lista de diccionarios (records).
     """
+    df = df.replace([np.inf, -np.inf], np.nan)  # reemplaza infinitos por NaN
+    df = df.fillna("")
     if df is None or df.empty:
         return []
     return df.to_dict(orient="records")

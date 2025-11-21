@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    # SQL Server (ERP PyA)
+    # SQL Server principal
     MSSQL_DRIVER: str = "ODBC Driver 18 for SQL Server"
     MSSQL_SERVER: str
     MSSQL_PORT: int = 1433
@@ -9,17 +9,20 @@ class Settings(BaseSettings):
     MSSQL_USER: str
     MSSQL_PASSWORD: str
 
-    # Postgres (base de datos del integrador)
-    POSTGRES_HOST: str = "db"  # nombre del servicio en docker-compose
+    # SQL Server remisiones
+    MSSQL_DB_REM: str   # <-- la nueva base que agregaste
+
+    # Postgres
+    POSTGRES_HOST: str = "db"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
 
-    # 🔐 Seguridad / JWT
-    SECRET_KEY: str = "change_me_secret"
-    JWT_ALGORITHM: str = "HS256"
-    JWT_EXP_HOURS: int = 12
+    # JWT
+    SECRET_KEY: str
+    JWT_ALGORITHM: str
+    JWT_EXP_HOURS: int
 
     class Config:
         env_file = ".env"

@@ -1,0 +1,1 @@
+select distinct origen,numero_pedido as numero_documento,estado from pedidos_enc

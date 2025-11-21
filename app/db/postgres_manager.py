@@ -72,6 +72,18 @@ class PostgresManager:
         """
         sql = self._read_sql(relative_path)
         self.execute_non_query(sql, params)
+        
+    def execute_insert_returning(self, sql: str, params=None):
+        """
+        Ejecuta un INSERT con RETURNING y hace commit de forma correcta.
+        """
+        self._connect()
+        with self.connection.cursor() as cur:
+            cur.execute(sql, params or ())
+            row = cur.fetchone()  # el RETURNING devuelve 1 fila
+            self.connection.commit()
+            return row
+
 
     def close(self):
         """
