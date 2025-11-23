@@ -14,6 +14,7 @@ def list_pedidos_por_aprobar():
     rows,_ = svc_picking.listar_pedidos()
     return {"data": rows}
 
+
 @router.get("/aprobados", summary="Pedidos aprobados")
 def list_pedidos_por_aprobar():
     """

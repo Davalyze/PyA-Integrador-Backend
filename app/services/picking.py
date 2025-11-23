@@ -1,7 +1,7 @@
 from app.crud import picking as crud_picking
 from app.services import a_transformer as transformer 
-
-
+from app.db.azure_connection import AzureBlobService
+azure = AzureBlobService()
 def listar_pedidos():
     """
     Retorna:
@@ -60,7 +60,8 @@ def listar_pedidos():
 
     # Pedidos aprobados o sacando
     df_sacar = df[df["estado"].isin(["APROBADO", "SACAR"])].copy()
-
+    print(df_sacar)
+    print('pene')
     # ============================
     # 🔹 Convertir a listas
     # ============================
@@ -121,6 +122,12 @@ def pedido_details_sacar(numero_documento: int, origen: str):
     rows_cantidad_sacada= crud_picking.get_cantidad_sacada(numero_documento, origen)
     df_cantidad_sacada= transformer.sql_to_df(rows_cantidad_sacada)
     df_pedido= df_pedido.merge( df_cantidad_sacada, on=['origen','numero_documento','referencia'], how='left')
+    if 'blob_name' in df_pedido.columns:
+        df_pedido['imagen_url'] = df_pedido['blob_name'].apply(
+            lambda x: azure.build_blob_url(x) if x else None
+        )
+    else:
+        df_pedido['imagen_url'] = None
     df_pedido['cantidad_sacada'] = df_pedido['cantidad_sacada'].fillna(0)
     rows = transformer.df_to_dict(df_pedido)
     return rows
