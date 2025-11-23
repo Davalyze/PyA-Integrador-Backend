@@ -93,6 +93,8 @@ def cambiar_estado_sacar(data: dict):
 class ProductoSacado(BaseModel):
     codigo_producto: str
     cantidad_sacada: int
+    observacion: str | None = None   # ← NUEVO CAMPO
+
 
 
 class SacarItems(BaseModel):
@@ -112,11 +114,12 @@ def guardar_cantidad_sacada(data: SacarItems):
                 origen=data.origen,
                 referencia=prod.codigo_producto,
                 cantidad_sacada=prod.cantidad_sacada,
+                observacion=prod.observacion,  # ← SE AGREGA AQUÍ
             )
 
         return {
             "ok": True,
-            "message": "Cantidades guardadas correctamente"
+            "message": "Cantidades y observaciones guardadas correctamente"
         }
 
     except Exception as e:

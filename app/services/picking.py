@@ -142,14 +142,22 @@ def update_estado(numero_pedido: int, origen: str, nuevo_estado: str):
 
 
 
-def actualizar_cantidad_sacada(numero_pedido, origen, referencia, cantidad_sacada):
+def actualizar_cantidad_sacada(
+    numero_pedido: int,
+    origen: str,
+    referencia: str,
+    cantidad_sacada: int,
+    observacion: str | None = None,
+):
     """
-    Actualiza la cantidad sacada en pedidos_det.
+    Actualiza la cantidad sacada y la observación en pedidos_det.
     """
     crud_picking.update_cantidad_sacada(
         numero_pedido=numero_pedido,
         origen=origen,
         referencia=referencia,
-        cantidad_sacada=cantidad_sacada
+        cantidad_sacada=cantidad_sacada,
+        observacion=observacion,   # ⬅ se envía al CRUD
     )
+
 

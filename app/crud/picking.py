@@ -202,12 +202,13 @@ def update_pedido_estado(numero_pedido, origen, nuevo_estado):
 
 
 
-def update_cantidad_sacada(numero_pedido, origen, referencia, cantidad_sacada):
+def update_cantidad_sacada(numero_pedido, origen, referencia, cantidad_sacada, observacion=None):
     pg = PostgresManager()
     try:
         sql = """
         UPDATE pedidos_det
         SET cantidad_sacada = %(cantidad_sacada)s,
+            observacion = %(observacion)s,
             updated_at = NOW()
         WHERE numero_pedido = %(numero_pedido)s
         AND origen = %(origen)s
@@ -215,6 +216,7 @@ def update_cantidad_sacada(numero_pedido, origen, referencia, cantidad_sacada):
         """
         params = {
             "cantidad_sacada": cantidad_sacada,
+            "observacion": observacion,
             "numero_pedido": numero_pedido,
             "origen": origen,
             "referencia": referencia
