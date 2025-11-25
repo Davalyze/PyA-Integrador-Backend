@@ -224,3 +224,49 @@ def update_cantidad_sacada(numero_pedido, origen, referencia, cantidad_sacada, o
         pg.execute_non_query(sql, params)
     finally:
         pg.close()
+
+
+def update_observacion_documento(numero_pedido, origen, observacion):
+    pg = PostgresManager()
+    try:
+        sql = """
+        UPDATE pedidos_enc
+        SET observacion_sacador = %(observacion)s,
+            updated_at = NOW()
+        WHERE numero_pedido = %(numero_pedido)s
+        AND origen = %(origen)s;
+        """
+        params = {
+            "observacion": observacion,
+            "numero_pedido": numero_pedido,
+            "origen": origen
+        }
+        pg.execute_non_query(sql, params)
+    finally:
+        pg.close()
+
+
+def update_observacion_empacador(numero_pedido, origen, observacion):
+    pg = PostgresManager()
+    sql = """
+        UPDATE pedidos_enc
+        SET observacion_empacador = %s
+        WHERE numero_pedido = %s AND origen = %s
+    """
+    params = (observacion, numero_pedido, origen)
+    pg.execute_non_query(sql, params)
+
+
+def update_cantidad_empacada( numero_pedido, origen, referencia, cantidad_empacada, observacion,numero_de_caja):
+    pg = PostgresManager()
+    sql = """
+        UPDATE pedidos_det 
+        SET cantidad_empacada = %s,
+            observacion = %s,
+            numero_de_caja = %s
+        WHERE numero_pedido = %s
+        AND origen = %s
+        AND codigo_producto = %s
+    """
+    params = (cantidad_empacada, observacion, numero_de_caja, numero_pedido, origen, referencia)
+    pg.execute_non_query(sql, params)

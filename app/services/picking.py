@@ -60,15 +60,16 @@ def listar_pedidos():
 
     # Pedidos aprobados o sacando
     df_sacar = df[df["estado"].isin(["APROBADO", "SACAR"])].copy()
-    print(df_sacar)
-    print('pene')
+    df_empaque = df[df["estado"].isin(["EN EMPAQUE",'EMPAQUE'])].copy()
+    print(df_empaque)
+
     # ============================
     # 🔹 Convertir a listas
     # ============================
     rows_sin_aprobar = transformer.df_to_dict(df_sin_aprobar)
     rows_sacar = transformer.df_to_dict(df_sacar)
-
-    return rows_sin_aprobar, rows_sacar
+    rows_empaque = transformer.df_to_dict(df_empaque)
+    return rows_sin_aprobar, rows_sacar,rows_empaque
 
 
 
@@ -78,6 +79,23 @@ def pedido_details(numero_documento: int, origen: str):
     """
     rows = crud_picking.get_detalle_pedido(numero_documento, origen)
     return rows
+
+def pedido_details_sacar(numero_documento: int, origen: str):
+    """
+    Lógica de negocio para obtener los detalles de un pedido.
+    """
+    rows = crud_picking.get_detalle_pedido(numero_documento, origen)
+    df_rows= transformer.sql_to_df(rows)
+    rows_sacada= crud_picking.get_cantidad_sacada(numero_documento, origen)
+    df_sacada= transformer.sql_to_df(rows_sacada)
+    df_sacada=df_sacada[['referencia','cantidad_sacada','cantidad_empcada']]
+    df_rows= df_rows.merge( df_sacada, on=['referencia'], how='left')
+    df_rows['cantidad_sacada'] = df_rows['cantidad_sacada'].fillna(0)
+    rows = transformer.df_to_dict(df_rows)
+    return rows
+
+
+
 
 def listar_pedidos_por_gestionar():
     """
@@ -160,4 +178,24 @@ def actualizar_cantidad_sacada(
         observacion=observacion,   # ⬅ se envía al CRUD
     )
 
+
+def actualizar_observacion_documento(numero_pedido, origen, observacion):
+    crud_picking.update_observacion_documento(
+        numero_pedido=numero_pedido,
+        origen=origen,
+        observacion=observacion
+    )
+    
+def actualizar_observacion_empacador(numero_pedido, origen, observacion):
+    crud_picking.update_observacion_empacador(numero_pedido, origen, observacion)
+    
+def actualizar_cantidad_empacada(numero_pedido, origen, referencia, cantidad_empacada, observacion,numero_de_caja):
+    crud_picking.update_cantidad_empacada(
+        numero_pedido=numero_pedido,
+        origen=origen,
+        referencia=referencia,
+        cantidad_empacada=cantidad_empacada,
+        observacion=observacion,
+        numero_de_caja=numero_de_caja
+    )
 
