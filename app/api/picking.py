@@ -124,6 +124,17 @@ def cambiar_estado_empaque(data: dict):
     
     return {"status": "ok", "estado": "EN EMPAQUE"}
 
+@router.post("/cambiar_estado_finalizado")
+def cambiar_estado_finalizado(data: dict):
+    numero = data["numero_pedido"]
+    origen = data["origen"]
+
+    # Actualizamos pedidos_enc
+    svc_picking.update_estado(numero, origen, "FINALIZADO")
+    
+    return {"status": "ok", "estado": "FINALIZADO"}
+
+
 
 class ProductoSacado(BaseModel):
     codigo_producto: str
